@@ -1,0 +1,17 @@
+CREATE DATABASE IF NOT EXISTS tienda_cafe
+  CHARACTER SET utf8mb4
+  COLLATE utf8mb4_unicode_ci;
+
+USE tienda_cafe;
+
+CREATE TABLE IF NOT EXISTS cafe (
+  id INT NOT NULL AUTO_INCREMENT,
+  cafe VARCHAR(120) NOT NULL,
+  especialidad VARCHAR(120) NOT NULL,
+  presentacion VARCHAR(80) NOT NULL,
+  origen VARCHAR(120) NOT NULL,
+  cantidad INT NOT NULL DEFAULT 0,
+  valor DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+  descripcion TEXT NULL,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

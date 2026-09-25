@@ -1,0 +1,110 @@
+<main class="storefront">
+  <section class="store-hero" aria-labelledby="hero-title">
+    <div class="hero-copy">
+      <span class="hero-kicker">{{ isAdmin ? 'Panel de administración' : 'Café de origen colombiano' }}</span>
+      <h1 id="hero-title">{{ isAdmin ? 'Inventario de café' : 'Una buena historia empieza con café.' }}</h1>
+      <p>{{ isAdmin ? 'Administra el catálogo y consulta el estado del inventario.' : 'Descubre cafés especiales, cultivados con dedicación y tostados para acompañar tus mejores momentos.' }}</p>
+      <a class="btn hero-button" href="#catalogo">{{ isAdmin ? 'Ver inventario' : 'Explorar cafés' }} <span aria-hidden="true">↓</span></a>
+    </div>
+    <div class="hero-art" aria-hidden="true">
+      <div class="hero-sun"></div>
+      <div class="hero-mountain mountain-back"></div>
+      <div class="hero-mountain mountain-front"></div>
+      <div class="hero-coffee-bag"><span>CAFÉ<br />PREMIUM</span><i>☕</i><small>DE COLOMBIA</small></div>
+      <span class="hero-bean bean-one">●</span><span class="hero-bean bean-two">●</span>
+    </div>
+  </section>
+
+  @if (errorMessage) { <div class="alert alert-danger shadow-sm mx-auto store-alert" role="alert">{{ errorMessage }}</div> }
+  @if (successMessage) { <div class="alert alert-success shadow-sm mx-auto store-alert" role="status">{{ successMessage }}</div> }
+
+  <section id="catalogo" class="catalog-section" aria-labelledby="catalog-title">
+    <div class="catalog-heading">
+      <div>
+        <p class="section-kicker">{{ isAdmin ? 'Gestión de productos' : 'De nuestra tierra a tu taza' }}</p>
+        <h2 id="catalog-title">{{ isAdmin ? 'Inventario' : 'Nuestros cafés' }}</h2>
+        <p class="catalog-subtitle">{{ isAdmin ? cafes.length + ' productos registrados' : 'Encuentra el sabor ideal para tu próximo momento.' }}</p>
+      </div>
+      <div class="catalog-tools">
+        <label class="search-box">
+          <span aria-hidden="true">⌕</span>
+          <input class="form-control" type="search" placeholder="Buscar café, origen..." [(ngModel)]="searchTerm" [ngModelOptions]="{ standalone: true }" aria-label="Buscar en el catálogo" />
+        </label>
+        @if (isAdmin) { <button type="button" class="btn add-coffee-button" (click)="isFormVisible ? resetForm() : openCreateForm()">
+          {{ isFormVisible ? 'Cerrar formulario' : '+ Agregar café' }}
+        </button> }
+        <button type="button" class="btn refresh-button" (click)="refreshCafes()" [disabled]="isLoading" aria-label="Actualizar inventario">↻</button>
+      </div>
+    </div>
+
+    <div class="catalog-layout" [class.with-editor]="isFormVisible">
+      @if (isAdmin && isFormVisible) {
+        <form class="product-form card shadow-sm" (ngSubmit)="submitCafe()">
+          <div class="card-body">
+            <div class="editor-heading">
+              <div><p class="section-kicker mb-1">Administración</p><h3 class="h4 mb-0">{{ editingId !== null ? 'Editar café' : 'Nuevo café' }}</h3></div>
+              <button type="button" class="editor-close" (click)="resetForm()" aria-label="Cerrar formulario">×</button>
+            </div>
+            <div class="editor-fields">
+              <label><span>Café</span><input class="form-control" type="text" [(ngModel)]="formModel.cafe" name="cafe" maxlength="120" placeholder="Ej: Café de origen colombiano" required /></label>
+              <label><span>Especialidad</span><input class="form-control" type="text" [(ngModel)]="formModel.especialidad" name="especialidad" maxlength="120" placeholder="Ej: Arábica lavado" required /></label>
+              <label><span>Presentación</span><input class="form-control" type="text" [(ngModel)]="formModel.presentacion" name="presentacion" maxlength="80" placeholder="Ej: Bolsa de 500 g" required /></label>
+              <label><span>Origen</span><input class="form-control" type="text" [(ngModel)]="formModel.origen" name="origen" maxlength="120" placeholder="Ej: Antioquia, Colombia" required /></label>
+              <label><span>Cantidad disponible</span><input class="form-control" type="number" [(ngModel)]="formModel.cantidad" name="cantidad" min="0" step="1" required /></label>
+              <label><span>Valor (COP)</span><input class="form-control" type="number" [(ngModel)]="formModel.valor" name="valor" min="0" step="0.01" required /></label>
+              <label class="description-field"><span>Descripción</span><textarea class="form-control" [(ngModel)]="formModel.descripcion" name="descripcion" rows="3" placeholder="Notas, proceso o características del café"></textarea></label>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary" [disabled]="isSaving">{{ isSaving ? 'Guardando...' : (editingId !== null ? 'Guardar cambios' : 'Publicar café') }}</button>
+              <button type="button" class="btn btn-outline-secondary" (click)="resetForm()">Cancelar</button>
+            </div>
+          </div>
+        </form>
+      }
+
+      <div class="catalog-content">
+        @if (isLoading && cafes.length === 0) {
+          <div class="catalog-message"><span class="spinner-border text-warning" role="status"></span><p>Cargando nuestros cafés...</p></div>
+        } @else if (visibleCafes.length > 0) {
+          <div class="product-grid">
+            @for (cafe of visibleCafes; track cafe.id) {
+              <article class="product-card card">
+                <div class="product-visual">
+                  <span class="origin-chip">{{ cafe.origen }}</span>
+                  <div class="product-bag"><span class="bag-brand">CAFÉ PREMIUM</span><strong>{{ cafe.cafe }}</strong><i>☕</i><small>{{ cafe.presentacion }}</small></div>
+                  <span class="stock-chip">{{ cafe.cantidad }} disponibles</span>
+                </div>
+                <div class="product-info card-body">
+                  <p class="product-specialty">{{ cafe.especialidad }}</p>
+                  <h3>{{ cafe.cafe }}</h3>
+                  <p class="product-description">{{ cafe.descripcion || 'Café colombiano seleccionado para disfrutar en cualquier momento.' }}</p>
+                  <div class="product-buy-row">
+                    <strong class="product-price">{{ cafe.valor | currency:'COP':'symbol':'1.0-2':'es-CO' }}</strong>
+                    @if (isAdmin) { <button type="button" class="btn product-edit" (click)="editCafe(cafe)" [disabled]="isSaving" aria-label="Editar {{ cafe.cafe }}">Editar</button> }
+                  </div>
+                  @if (isAdmin) { <button type="button" class="btn product-delete" (click)="deleteCafe(cafe.id)" [disabled]="isLoading">Eliminar producto</button> }
+                </div>
+              </article>
+            }
+          </div>
+        } @else if (cafes.length > 0) {
+          <div class="catalog-message"><h3>No encontramos ese café</h3><p>Prueba con otro nombre, especialidad u origen.</p></div>
+        } @else if (!errorMessage) {
+          <div class="catalog-message"><h3>{{ isAdmin ? 'El inventario está vacío' : 'Muy pronto, el primer café' }}</h3><p>{{ isAdmin ? 'Agrega un producto para comenzar a llenar el catálogo.' : 'Estamos preparando nuestra selección de cafés.' }}</p>@if (isAdmin) { <button type="button" class="btn add-coffee-button" (click)="openCreateForm()">Agregar primer café</button> }</div>
+        }
+      </div>
+    </div>
+  </section>
+
+  @if (isAdmin) {
+    <section class="origin-banner admin-orders" aria-labelledby="orders-title">
+      <span aria-hidden="true">📦</span><div><p class="section-kicker">Módulo futuro</p><h2 id="orders-title">Órdenes de compra</h2><p class="mb-0">Esta sección se conectará cuando se incorpore el módulo de compras.</p></div>
+      <span class="badge text-bg-secondary">Próximamente</span>
+    </section>
+  }
+
+  <section class="origin-banner">
+    <span>☕</span><div><p class="section-kicker">El sabor de nuestras montañas</p><h2>Detrás de cada taza hay una historia.</h2></div>
+    <a href="#catalogo">Conoce nuestros cafés ↑</a>
+  </section>
+</main>

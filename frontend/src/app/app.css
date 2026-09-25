@@ -1,0 +1,3 @@
+.cafe-navbar { background: #603819; }
+.cafe-navbar .nav-link { color: rgba(255,255,255,.78); border-radius: .5rem; padding-inline: .75rem; }
+.cafe-navbar .nav-link:hover, .cafe-navbar .nav-link.active { color: #fff; background: rgba(255,255,255,.14); }

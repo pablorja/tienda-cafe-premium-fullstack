@@ -1,0 +1,23 @@
+# .NET / Visual Studio
+**/bin/
+**/obj/
+**/.vs/
+*.user
+*.suo
+
+# Secretos y configuración local
+**/appsettings.secrets.json
+**/.env
+**/.env.*
+!**/.env.example
+
+# Angular / Node
+**/node_modules/
+**/dist/
+**/.angular/cache/
+**/coverage/
+npm-debug.log*
+
+# Sistema operativo
+.DS_Store
+Thumbs.db

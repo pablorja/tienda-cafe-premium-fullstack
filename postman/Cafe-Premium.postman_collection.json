@@ -1,0 +1,70 @@
+{
+  "info": {
+    "_postman_id": "631e92d0-7a73-47bc-a1e3-1a93133ec1cc",
+    "name": "Café Premium — API CRUD",
+    "description": "Secuencia para probar el catálogo café en una base local. Ejecuta las solicitudes de arriba hacia abajo; POST guarda cafeId para las siguientes.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5031/api", "type": "string" },
+    { "key": "cafeId", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "1. Listar cafés",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "{{baseUrl}}/cafe", "host": ["{{baseUrl}}"], "path": ["cafe"] }
+      },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Lista responde 200', function () { pm.response.to.have.status(200); });", "pm.test('La respuesta es un arreglo', function () { pm.expect(pm.response.json()).to.be.an('array'); });"] } }]
+    },
+    {
+      "name": "2. Crear café de prueba",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"cafe\": \"Café de prueba Postman\",\n  \"especialidad\": \"Arábica lavado\",\n  \"presentacion\": \"Bolsa de 340 g\",\n  \"origen\": \"Antioquia, Colombia\",\n  \"cantidad\": 10,\n  \"valor\": 35000.00,\n  \"descripcion\": \"Registro de demostración creado desde Postman\"\n}", "options": { "raw": { "language": "json" } } },
+        "url": { "raw": "{{baseUrl}}/cafe", "host": ["{{baseUrl}}"], "path": ["cafe"] }
+      },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Café creado con 201', function () { pm.response.to.have.status(201); });", "const cafe = pm.response.json();", "pm.expect(cafe.id).to.exist;", "pm.collectionVariables.set('cafeId', String(cafe.id));"] } }]
+    },
+    {
+      "name": "3. Consultar café creado",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "{{baseUrl}}/cafe/{{cafeId}}", "host": ["{{baseUrl}}"], "path": ["cafe", "{{cafeId}}"] }
+      },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Café encontrado con 200', function () { pm.response.to.have.status(200); });", "pm.test('El ID coincide con el creado', function () { pm.expect(String(pm.response.json().id)).to.eql(pm.collectionVariables.get('cafeId')); });"] } }]
+    },
+    {
+      "name": "4. Actualizar café",
+      "request": {
+        "method": "PUT",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"id\": {{cafeId}},\n  \"cafe\": \"Café de prueba Postman editado\",\n  \"especialidad\": \"Arábica lavado\",\n  \"presentacion\": \"Bolsa de 340 g\",\n  \"origen\": \"Antioquia, Colombia\",\n  \"cantidad\": 8,\n  \"valor\": 36000.00,\n  \"descripcion\": \"Registro actualizado desde Postman\"\n}", "options": { "raw": { "language": "json" } } },
+        "url": { "raw": "{{baseUrl}}/cafe/{{cafeId}}", "host": ["{{baseUrl}}"], "path": ["cafe", "{{cafeId}}"] }
+      },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Actualización responde 204', function () { pm.response.to.have.status(204); });"] } }]
+    },
+    {
+      "name": "5. Eliminar café de prueba",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": { "raw": "{{baseUrl}}/cafe/{{cafeId}}", "host": ["{{baseUrl}}"], "path": ["cafe", "{{cafeId}}"] }
+      },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Eliminación responde 204', function () { pm.response.to.have.status(204); });"] } }]
+    },
+    {
+      "name": "6. Verificar eliminación",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "{{baseUrl}}/cafe/{{cafeId}}", "host": ["{{baseUrl}}"], "path": ["cafe", "{{cafeId}}"] }
+      },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('El café eliminado responde 404', function () { pm.response.to.have.status(404); });"] } }]
+    }
+  ]
+}
